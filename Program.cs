@@ -16,8 +16,16 @@ listener.MessageEvent += (api, message) =>
 {
     if (message.MessageType is Message.GroupType && message.Source.UserId is 1538757052 or 920059839 or 775942303)
     {
+
         var text = message.Content.Text;
-        if (text.Contains("呕") || text.Contains("哎") || text.Contains("白毛") || text.Contains("蓝瞳") || text.Contains("二次元") || text.Contains("口") && text.Contains("区") || text.Contains("好想") || text.Contains("绷"))
+        if (text.Contains("呕")
+            || text.Contains("哎")
+            || text.Contains("白") && text.Contains("毛")
+            || text.Contains("蓝") && text.Contains("瞳")
+            || text.Contains("二次元")
+            || text.Contains("口") && text.Contains("区")
+            || text.Contains("好想")
+            || text.Contains("绷"))
         {
             SendDnkFun();
         }
