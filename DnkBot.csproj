@@ -6,7 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="dnkFuns\**" />
+  </ItemGroup>
+
+
 	<ItemGroup>
+		<PackageReference Include="cqhttp.Cyan" Version="3.1.1" />
+		<PackageReference Include="GammaLibrary" Version="3.0.0-pre2" />
+		<PackageReference Include="Onebot.Protocol" Version="2.0.143" />
 		<PackageReference Include="Sisters.WudiLib.WebSocket" Version="0.2.1" />
 	</ItemGroup>
 
