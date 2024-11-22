@@ -1,0 +1,3 @@
+[submodule "dnkFuns"]
+	path = dnkFuns
+	url = https://github.com/DnkBook/dnkFuns
