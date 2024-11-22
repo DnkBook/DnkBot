@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Text.Json;
+using AnyAscii;
 using GammaLibrary;
 using GammaLibrary.Extensions;
 using PininSharp;
@@ -63,11 +64,27 @@ listener.MessageEvent += (api, message) =>
                 if (PinIn.CreateDefault().GetCharacter(message.Content.Text.Trim().Last()).Pinyins().Any(x => x.ToString().Contains("ou")))
                 {
                     SendDnkFun(msg.GroupId, message.Source.UserId, true);
+                    return;
                 }
             }
             catch (Exception e)
             {
                 
+            }
+
+            try
+            {
+                var msg1 = message.Content.Text;
+                var lower = msg1.Transliterate().ToLower();
+                if (lower.Contains("o") && lower.Contains("u"))
+                {
+                    SendDnkFun(msg.GroupId, message.Source.UserId, true);
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
             }
         }
 

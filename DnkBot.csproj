@@ -13,6 +13,7 @@
 
 
 	<ItemGroup>
+		<PackageReference Include="AnyAscii" Version="0.3.2" />
 		<PackageReference Include="GammaLibrary" Version="3.0.0-pre2" />
 		<PackageReference Include="Sisters.WudiLib.WebSocket" Version="0.2.1" />
 	</ItemGroup>
