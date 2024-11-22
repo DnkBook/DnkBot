@@ -1,6 +1,8 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AnyAscii;
 using GammaLibrary;
 using GammaLibrary.Extensions;
@@ -10,6 +12,7 @@ using Sisters.WudiLib.Posts;
 using Message = Sisters.WudiLib.Posts.Message;
 
 var qq = new HttpApiClient();
+Regex cjkCharRegex = new Regex(@"\p{IsCJKUnifiedIdeographs}");
 
 qq.ApiAddress = "http://192.168.0.234:20000/";
 var listener = new Sisters.WudiLib.WebSocket.CqHttpWebSocketEvent("ws://192.168.0.234:20001/");
@@ -39,6 +42,7 @@ listener.MessageEvent += (api, message) =>
                 }
             }
             var text = message.Content.Text;
+            
             if (text.Contains("呕")
                 || text.Contains("哎")
                 || text.Contains("白") && text.Contains("毛")
@@ -61,7 +65,7 @@ listener.MessageEvent += (api, message) =>
 
             try
             {
-                if (PinIn.CreateDefault().GetCharacter(message.Content.Text.Trim().Last()).Pinyins().Any(x => x.ToString().Contains("ou")))
+                if (PinIn.CreateDefault().GetCharacter(message.Content.Text.Trim().Last()).Pinyins().Any(x => x.ToString().StartsWith("ou")))
                 {
                     SendDnkFun(msg.GroupId, message.Source.UserId, true);
                     return;
@@ -75,8 +79,8 @@ listener.MessageEvent += (api, message) =>
             try
             {
                 var msg1 = message.Content.Text;
-                var lower = msg1.Transliterate().ToLower();
-                if (lower.Contains("o") && lower.Contains("u"))
+                var lower = BuildNonChinese(msg1).Transliterate().ToLower();
+                if (lower.Contains("ou"))
                 {
                     SendDnkFun(msg.GroupId, message.Source.UserId, true);
                     return;
@@ -85,6 +89,11 @@ listener.MessageEvent += (api, message) =>
             catch (Exception e)
             {
                 Console.WriteLine(e);
+            }
+
+            if (text.Any() && Random.Shared.NextDouble() < 0.03)
+            {
+                SendDnkFun(msg.GroupId, message.Source.UserId);
             }
         }
 
@@ -119,7 +128,10 @@ void SendDnkFun(long group, long sourceUserId, bool mute = false)
 {
     var files = Directory.GetFiles("../../../dnkFuns/dnkBook", "*.*", SearchOption.AllDirectories).Where(x =>
         Path.GetFileName(x).EndsWith(".png") || Path.GetFileName(x).EndsWith(".jpg"));
-    SendImage(group,files.PickOne(), mute, sourceUserId);
+    if (Random.Shared.NextDouble() < 0.7)
+    {
+        SendImage(group,files.PickOne(), mute, sourceUserId);
+    }
 }
 
 void SendImage(long group, string path, bool mute, long sourceUserId)
@@ -137,6 +149,22 @@ void SendImage(long group, string path, bool mute, long sourceUserId)
     }
 }
 
+string BuildNonChinese(string s)
+{
+    var ca = s.ToCharArray();
+    var sb = new StringBuilder();
+    foreach (var c in ca)
+    {
+        if (!IsChinese(c)) sb.Append(c);
+    }
+
+    return sb.ToString();
+}
+
+bool IsChinese(char c)
+{
+    return cjkCharRegex.IsMatch(c.ToString());
+}
 
 [ConfigurationPath("dnk.json")]
 public class Config : Configuration<Config>
