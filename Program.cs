@@ -8,23 +8,30 @@ using Sisters.WudiLib.Posts;
 using Message = Sisters.WudiLib.Posts.Message;
 
 var qq = new HttpApiClient();
-qq.ApiAddress = "http://192.168.0.234:10000/";
-var listener = new Sisters.WudiLib.WebSocket.CqHttpWebSocketEvent("ws://192.168.0.234:10001/");
-var hc = new HttpClient();
+
+qq.ApiAddress = "http://192.168.0.234:20000/";
+var listener = new Sisters.WudiLib.WebSocket.CqHttpWebSocketEvent("ws://192.168.0.234:20001/");
 listener.ApiClient = qq;
+//
+// var qqSelf = new HttpApiClient();
+// qqSelf.ApiAddress = "http://192.168.0.234:20000/";
+// var listenerSelf = new Sisters.WudiLib.WebSocket.CqHttpWebSocketEvent("ws://192.168.0.234:20001/");
+// listenerSelf.ApiClient = qqSelf;
+
+var hc = new HttpClient();
 listener.MessageEvent += (api, message) =>
 {
 
     try
     {
-        if (message.MessageType is Message.GroupType && message.Source.UserId is 1538757052 or 920059839)
+        if (message.MessageType is Message.GroupType && message.Source.UserId is 1538757052 or 920059839 or 775942303)
         {
             var msg = (GroupMessage)message;
             foreach (var section in msg.Content.Sections)
             {
                 if (section.Data.TryGetValue("file_unique", out var x) && Config.Instance.MarkedImageIds.Contains(x))
                 {
-                    SendDnkFun(msg.GroupId);
+                    SendDnkFun(msg.GroupId, message.Source.UserId, true);
                     return;
                 }
             }
@@ -40,10 +47,11 @@ listener.MessageEvent += (api, message) =>
                 || text.Contains("〇") && text.Contains("区")
                 || text.Contains("好想")
                 || text.Contains("绷")
+                || text.Contains("藕")
                 || text.ToLower().Contains("omc")
                )
             {
-                SendDnkFun(msg.GroupId);
+                SendDnkFun(msg.GroupId, message.Source.UserId, true);
             }
 
         }
@@ -61,7 +69,7 @@ listener.MessageEvent += (api, message) =>
                 var s = element.GetProperty("file_unique").GetString();
                 Config.Instance.MarkedImageIds.Add(s);
                 Config.Save();
-                SendDnkFun(msg.GroupId);
+                SendDnkFun(msg.GroupId, message.Source.UserId);
             }
         }
     }
@@ -71,20 +79,30 @@ listener.MessageEvent += (api, message) =>
     }
 
 };
-await listener.StartListen(CancellationToken.None);
-
+listener.StartListen(CancellationToken.None);
+//listenerSelf.StartListen(CancellationToken.None);
 Thread.CurrentThread.Join();
 
-void SendDnkFun(long group)
+void SendDnkFun(long group, long sourceUserId, bool mute = false)
 {
     var files = Directory.GetFiles("../../../dnkFuns/dnkBook", "*.*", SearchOption.AllDirectories).Where(x =>
         Path.GetFileName(x).EndsWith(".png") || Path.GetFileName(x).EndsWith(".jpg"));
-    SendImage(group,files.PickOne());
+    SendImage(group,files.PickOne(), mute, sourceUserId);
 }
 
-void SendImage(long group, string path)
+void SendImage(long group, string path, bool mute, long sourceUserId)
 {
     qq.SendGroupMessageAsync(group, SendingMessage.LocalImage(path, true)).Wait();
+    mute = false;
+    if (mute)
+    {
+        Config.Instance.MuteCount++;
+        Config.Save();
+        var max = 60 * 3;
+        var pow = (int)Math.Min(Math.Pow(Config.Instance.MuteCount, 2), max);
+        //qqSelf.BanGroupMember(group, sourceUserId, pow);
+        //qqSelf.SendGroupMessageAsync(group, pow == max ? $"精致睡眠: {(int)(Math.Pow(Config.Instance.MuteCount, 2))}s (已为最大值 3 min)" :$"精致睡眠: {pow}s");
+    }
 }
 
 
@@ -92,4 +110,5 @@ void SendImage(long group, string path)
 public class Config : Configuration<Config>
 {
     public List<string> MarkedImageIds = new List<string>();
+    public int MuteCount = -1;
 }
