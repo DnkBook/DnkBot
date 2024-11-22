@@ -3,6 +3,7 @@
 using System.Text.Json;
 using GammaLibrary;
 using GammaLibrary.Extensions;
+using PininSharp;
 using Sisters.WudiLib;
 using Sisters.WudiLib.Posts;
 using Message = Sisters.WudiLib.Posts.Message;
@@ -17,6 +18,7 @@ listener.ApiClient = qq;
 // qqSelf.ApiAddress = "http://192.168.0.234:20000/";
 // var listenerSelf = new Sisters.WudiLib.WebSocket.CqHttpWebSocketEvent("ws://192.168.0.234:20001/");
 // listenerSelf.ApiClient = qqSelf;
+var pinyin = PinIn.CreateDefault().GetCharacter('呕').Pinyins();
 
 var hc = new HttpClient();
 listener.MessageEvent += (api, message) =>
@@ -48,12 +50,25 @@ listener.MessageEvent += (api, message) =>
                 || text.Contains("好想")
                 || text.Contains("绷")
                 || text.Contains("藕")
+                || text.Contains("欧")
                 || text.ToLower().Contains("omc")
                )
             {
                 SendDnkFun(msg.GroupId, message.Source.UserId, true);
+                return;
             }
 
+            try
+            {
+                if (PinIn.CreateDefault().GetCharacter(message.Content.Text.Trim().Last()).Pinyins().Any(x => x.ToString().Contains("ou")))
+                {
+                    SendDnkFun(msg.GroupId, message.Source.UserId, true);
+                }
+            }
+            catch (Exception e)
+            {
+                
+            }
         }
 
         if (message.MessageType is Message.GroupType && message.Source.UserId is 775942303)

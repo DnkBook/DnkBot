@@ -17,4 +17,11 @@
 		<PackageReference Include="Sisters.WudiLib.WebSocket" Version="0.2.1" />
 	</ItemGroup>
 
+
+	<ItemGroup>
+	  <Reference Include="PininSharp">
+	    <HintPath>PininSharp.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>
