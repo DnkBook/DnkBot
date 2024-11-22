@@ -14,7 +14,7 @@ var listener = new Sisters.WudiLib.WebSocket.CqHttpWebSocketEvent("ws://192.168.
 listener.ApiClient = qq;
 listener.MessageEvent += (api, message) =>
 {
-    if (message.MessageType is Message.GroupType && message.Source.UserId is 1538757052 or 920059839 or 775942303)
+    if (message.MessageType is Message.GroupType && message.Source.UserId is 1538757052 or 920059839)
     {
 
         var text = message.Content.Text;
@@ -25,7 +25,9 @@ listener.MessageEvent += (api, message) =>
             || text.Contains("二次元")
             || text.Contains("口") && text.Contains("区")
             || text.Contains("好想")
-            || text.Contains("绷"))
+            || text.Contains("绷")
+            || text.ToLower().Contains("omc")
+            )
         {
             SendDnkFun();
         }
