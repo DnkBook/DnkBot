@@ -65,7 +65,8 @@ listener.MessageEvent += (api, message) =>
 
             try
             {
-                if (PinIn.CreateDefault().GetCharacter(message.Content.Text.Trim().Last()).Pinyins().Any(x => x.ToString().StartsWith("ou")))
+                if (PinIn.CreateDefault().GetCharacter(BuildOnlyChinese(message.Content.Text.Trim()).Last()).Pinyins().Any(x => x.ToString().StartsWith("ou"))
+                    || PinIn.CreateDefault().GetCharacter(BuildOnlyChinese(message.Content.Text.Trim()).First()).Pinyins().Any(x => x.ToString().StartsWith("ou")))
                 {
                     SendDnkFun(msg.GroupId, message.Source.UserId, true);
                     return;
@@ -148,7 +149,17 @@ void SendImage(long group, string path, bool mute, long sourceUserId)
         //qqSelf.SendGroupMessageAsync(group, pow == max ? $"精致睡眠: {(int)(Math.Pow(Config.Instance.MuteCount, 2))}s (已为最大值 3 min)" :$"精致睡眠: {pow}s");
     }
 }
+string BuildOnlyChinese(string s)
+{
+    var ca = s.ToCharArray();
+    var sb = new StringBuilder();
+    foreach (var c in ca)
+    {
+        if (IsChinese(c)) sb.Append(c);
+    }
 
+    return sb.ToString();
+}
 string BuildNonChinese(string s)
 {
     var ca = s.ToCharArray();
