@@ -30,9 +30,19 @@ listener.MessageEvent += (api, message) =>
 
     try
     {
+        if (message.MessageType is Message.GroupType)
+        {
+            var msg = (GroupMessage)message;
+            if (msg.Content.Text.Contains("/dnk"))
+            {
+                Console.WriteLine("触发: /dnk");
+                SendDnkFun(msg.GroupId, 0);
+            }
+        }
         if (message.MessageType is Message.GroupType && message.Source.UserId is 1538757052 or 920059839 or 775942303)
         {
             var msg = (GroupMessage)message;
+
             foreach (var section in msg.Content.Sections)
             {
                 if (section.Data.TryGetValue("file_unique", out var x) && Config.Instance.MarkedImageIds.Contains(x))
@@ -56,9 +66,11 @@ listener.MessageEvent += (api, message) =>
                 || text.Contains("绷")
                 || text.Contains("藕")
                 || text.Contains("欧")
+                || text.Contains("少发")
                 || text.ToLower().Contains("omc")
                )
             {
+                Console.WriteLine("触发: 普通匹配");
                 SendDnkFun(msg.GroupId, message.Source.UserId, true);
                 return;
             }
@@ -68,6 +80,7 @@ listener.MessageEvent += (api, message) =>
                 if (PinIn.CreateDefault().GetCharacter(BuildOnlyChinese(message.Content.Text.Trim()).Last()).Pinyins().Any(x => x.ToString().StartsWith("ou"))
                     || PinIn.CreateDefault().GetCharacter(BuildOnlyChinese(message.Content.Text.Trim()).First()).Pinyins().Any(x => x.ToString().StartsWith("ou")))
                 {
+                    Console.WriteLine("触发: 拼音匹配");
                     SendDnkFun(msg.GroupId, message.Source.UserId, true);
                     return;
                 }
@@ -83,6 +96,7 @@ listener.MessageEvent += (api, message) =>
                 var lower = BuildNonChinese(msg1).Transliterate().ToLower();
                 if (lower.Contains("ou"))
                 {
+                    Console.WriteLine("触发: ou");
                     SendDnkFun(msg.GroupId, message.Source.UserId, true);
                     return;
                 }
@@ -94,6 +108,7 @@ listener.MessageEvent += (api, message) =>
 
             if (text.Any() && Random.Shared.NextDouble() < 0.03)
             {
+                Console.WriteLine("触发: 中奖");
                 SendDnkFun(msg.GroupId, message.Source.UserId);
             }
         }
